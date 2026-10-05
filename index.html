@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Feliz Cumpleaños Melanie! 💜✨</title>
+    <link rel="stylesheet" href="Style.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+    <!-- FONDO DE ESTRELLAS FLOTANTES -->
+    <div class="stars-container" id="starsContainer"></div>
+
+    <!-- REPRODUCTOR DE MÚSICA -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="cancion.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- PASO 1: PASTEL DE CUMPLEAÑOS QUE SE ABRE EN DOS -->
+    <section id="paso1" class="step-section active">
+        <h1 class="title">¡Feliz Cumpleaños, Melanie! 🎉💜</h1>
+        <div class="cake-wrapper" id="cakeWrapper" onclick="abrirPastel()">
+            <div class="cake-half cake-top">🎂</div>
+            <div class="cake-half cake-bottom">🎂</div>
+        </div>
+        <button class="btn-action" onclick="abrirPastel()">Siguiente ➔</button>
+    </section>
+
+    <!-- PASO 2: MENSAJE REVELADO DEL REGALO -->
+    <section id="paso2" class="step-section">
+        <div class="card-box">
+            <h2>✨ ¡Espero que te guste mi regalo, Melanie! ✨</h2>
+            <p>Preparé este detalle con mucho cariño en tu color favorito para celebrar tu día especial.</p>
+            <button class="btn-action" onclick="irASeccion('paso3')">Ver tu carta ✉️</button>
+        </div>
+    </section>
+
+    <!-- PASO 3: CARTA ANIMADA -->
+    <section id="paso3" class="step-section">
+        <div class="letter-container">
+            <h2 class="title">Una carta para Melanie ✉💜</h2>
+            <div class="letter-box">
+                <p id="typedText"></p>
+            </div>
+            <button class="btn-action" onclick="reiniciarCarta()">Volver a leer 🔄</button>
+        </div>
+    </section>
+
+    <script>
+        const textoCarta = "Querida Melanie,\n\nHoy es un día verdaderamente especial porque celebramos la vida de una persona extraordinaria. Quería preparar un detalle único pensado especialmente en ti y en tus gustos, decorado en tu color favorito para sacarte una sonrisa desde el primer instante.\n\nGracias por ser esa presencia tan bonita, alegre y auténtica. Tu forma de ser, tu vibra positiva y la luz que transmites hacen que cada momento compartido sea inolvidable. Gracias por cada risa compartida, por los consejos en los momentos indicados y por brindarme una amistad sincera e incondicional que valoro con el alma.\n\nEn este nuevo año de vida que comienzas, le pido al universo y a la vida que te rodeen de infinitas bendiciones. Deseo de corazón que recibas mucha salud, momentos de paz, abrazos sinceros, éxito en cada proyecto que emprendas y, sobre todo, muchísima felicidad.\n\nNunca dejes de soñar en grande ni de confiar en todo el potencial que tienes dentro. Tienes una magia única para transformar los días ordinarios en recuerdos especiales, y no tengo duda de que te esperan cosas maravillosas en tu camino.\n\n¡Disfruta mucho tu día, ríe a carcajadas, come pastel y celebra al máximo!\n\n¡Que tengas el mejor de los cumpleaños, Melanie! 🎂🎉💜✨";
+
+        let indexText = 0;
+        let isTyping = false;
+        let pastelAbierto = false;
+
+        // Generar estrellas flotantes
+        function crearEstrellas() {
+            const container = document.getElementById('starsContainer');
+            const cantidad = 35;
+            for (let i = 0; i < cantidad; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.innerHTML = Math.random() > 0.5 ? '✨' : '💜';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                star.style.animationDelay = (Math.random() * 5) + 's';
+                star.style.fontSize = (Math.random() * 12 + 10) + 'px';
+                container.appendChild(star);
+            }
+        }
+        crearEstrellas();
+
+        // Función de reproducción de audio
+        function reproducirMusica() {
+            const music = document.getElementById('bgMusic');
+            if (music) {
+                music.volume = 0.8;
+                music.play().then(() => {
+                    console.log("¡Música sonando!");
+                }).catch(err => {
+                    console.log("El navegador requiere interacción manual:", err);
+                });
+            }
+        }
+
+        // Activa la música con cualquier clic en la pantalla
+        window.addEventListener('click', function() {
+            reproducirMusica();
+        }, { once: true });
+
+        function abrirPastel() {
+            reproducirMusica();
+            if (pastelAbierto) return;
+            pastelAbierto = true;
+
+            const cakeWrapper = document.getElementById('cakeWrapper');
+            cakeWrapper.classList.add('open');
+
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { y: 0.6 },
+                    colors: ['#a855f7', '#c084fc', '#e9d5ff', '#ffd700', '#ec4899']
+                });
+            }
+
+            setTimeout(() => {
+                irASeccion('paso2');
+            }, 700);
+        }
+
+        function irASeccion(idPaso) {
+            reproducirMusica();
+            const actual = document.querySelector('.step-section.active');
+            if (actual) {
+                actual.classList.remove('active');
+                actual.classList.add('exit');
+                setTimeout(() => {
+                    actual.classList.remove('exit');
+                }, 500);
+            }
+
+            setTimeout(() => {
+                const destino = document.getElementById(idPaso);
+                destino.classList.add('active');
+
+                if (idPaso === 'paso3' && !isTyping && indexText === 0) {
+                    escribirCarta();
+                }
+            }, 300);
+        }
+
+        function escribirCarta() {
+            if (indexText < textoCarta.length) {
+                isTyping = true;
+                const char = textoCarta.charAt(indexText);
+                document.getElementById('typedText').innerHTML += char === '\n' ? '<br>' : char;
+                indexText++;
+                setTimeout(escribirCarta, 30); // Velocidad ajustada para que lea fluido
+            } else {
+                isTyping = false;
+            }
+        }
+
+        function reiniciarCarta() {
+            document.getElementById('typedText').innerHTML = "";
+            indexText = 0;
+            escribirCarta();
+        }
+    </script>
+</body>
+</html>
